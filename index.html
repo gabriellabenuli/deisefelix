@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deise Felix · Estúdio de Beleza</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+/* FONTS */
+@font-face{font-family:'VeryVogue';src:url('fonts/VeryVogue.otf') format('opentype');font-display:swap;}
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f8f8f6;--green:#789273;--gl:#ecf4eb;--gd:#5a6e56;
+  --text:#6d655e;--td:#2e2a26;--tl:#a09890;--tm:#8a8078;
+  --border:#e8e4df;--card:#fff;--sw:228px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 8px rgba(0,0,0,.04);
+}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+.vv{font-family:'VeryVogue',serif;letter-spacing:.02em}
+.app{display:flex;height:100vh;overflow:hidden}
+.hidden{display:none!important}
+.flex-1{flex:1}
+.font-medium{font-weight:500}
+.td{color:var(--td)}
+.text-light{color:var(--tl)}
+.text-xs{font-size:11px}
+
+/* SIDEBAR */
+.sidebar{width:var(--sw);background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sl{padding:22px 20px 16px;border-bottom:1px solid var(--border)}
+.sl .brand{font-family:'VeryVogue',serif;font-size:22px;color:var(--green);letter-spacing:.04em}
+.sl .sub{font-size:9px;color:var(--tl);letter-spacing:.2em;text-transform:uppercase;margin-top:3px}
+.snav{padding:12px 10px;flex:1}
+.nsec{margin-bottom:14px}
+.nslabel{font-size:9px;text-transform:uppercase;letter-spacing:.18em;color:var(--tl);padding:0 10px;margin-bottom:4px}
+.ni{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:12.5px;color:var(--tm);transition:all .15s;margin-bottom:1px;user-select:none}
+.ni:hover{background:var(--gl);color:var(--gd)}
+.ni.active{background:var(--gl);color:var(--green);font-weight:500}
+.shelp{padding:9px 12px;margin:0 8px 10px;background:#f5f2ef;border-radius:9px;cursor:pointer}
+.sfooter{padding:11px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.sav{width:30px;height:30px;border-radius:50%;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:var(--green);flex-shrink:0}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.header{height:56px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 26px;flex-shrink:0;box-shadow:var(--shadow)}
+.hacts{display:flex;align-items:center;gap:10px}
+.notif-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;font-size:15px}
+.notif-dot{width:7px;height:7px;background:#e07a5f;border-radius:50%;position:absolute;top:5px;right:5px;border:1.5px solid white}
+.page{flex:1;overflow-y:auto;padding:26px;display:none}
+.page.active{display:block}
+
+/* BUTTONS */
+.btn{padding:7px 15px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;border:none;transition:all .15s;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.btnp{background:var(--green);color:white}
+.btnp:hover{background:var(--gd)}
+.btng{background:white;color:var(--tm);border:1px solid var(--border)}
+.btng:hover{background:var(--gl);color:var(--green);border-color:var(--green)}
+.btn-wa{background:#25d366;color:white;border:none}
+.btn-wa:hover{background:#20bb5a}
+.btn-wa-sm{display:inline-flex;align-items:center;gap:4px;background:#25d366;color:white;border:none;border-radius:6px;padding:4px 9px;font-size:11px;font-weight:500;cursor:pointer;text-decoration:none;transition:all .15s}
+.btn-wa-sm:hover{background:#20bb5a}
+.btn-icon{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:white;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;font-size:14px}
+.btn-icon:hover{background:var(--gl);border-color:var(--green)}
+.back-btn{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--tl);cursor:pointer;background:none;border:none;padding:0;margin-bottom:16px;font-family:'DM Sans',sans-serif;transition:color .15s}
+.back-btn:hover{color:var(--green)}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:var(--shadow)}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.stat-label{font-size:10.5px;color:var(--tl);text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px}
+.stat-value{font-family:'VeryVogue',serif;font-size:30px;color:var(--td);line-height:1}
+.stat-sub{font-size:11px;color:var(--tl);margin-top:4px}
+.stat-accent .stat-value{color:var(--green)}
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.stats-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stats-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-main{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+.grid-profile{display:grid;grid-template-columns:1fr 280px;gap:20px}
+
+/* BADGES / TAGS */
+.badge{padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:500;white-space:nowrap}
+.b-ok{background:#e6f0e5;color:#4a7a4a}
+.b-pend{background:#f5eddc;color:#8a6e30}
+.b-late{background:#f0e6e6;color:#8a3a3a}
+.b-done{background:#e5eeed;color:#3a6e60}
+.b-abs{background:#edecea;color:#6a6460}
+.b-low{background:#fdf0e0;color:#9a6020}
+.b-crit{background:#f5e0e0;color:#9a3030}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10.5px;background:var(--gl);color:var(--gd);font-weight:500}
+.link-sm{font-size:12px;color:var(--green);cursor:pointer;font-weight:500}
+.link-sm:hover{text-decoration:underline}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--tl);text-align:left;padding:8px 11px;border-bottom:1px solid var(--border);font-weight:500}
+.tbl td{padding:9px 11px;font-size:12.5px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr:hover td{background:#fafaf8;cursor:pointer}
+.empty{text-align:center;color:var(--tl);padding:24px!important}
+.row-alert{background:#fffaf7}
+
+/* SEARCH BAR */
+.sbar-wrap2{display:flex;gap:10px;margin-bottom:14px;align-items:center}
+.sinput{flex:1;padding:8px 13px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:white;outline:none}
+.sinput:focus{border-color:var(--green)}
+
+/* AVATARS */
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;flex-shrink:0}
+.av-xs{width:26px;height:26px;font-size:9px}
+.av-sm{width:32px;height:32px;font-size:10.5px}
+.av-md{width:40px;height:40px;font-size:13px}
+.av-lg{width:52px;height:52px;font-size:16px}
+.av1{background:#f0e8e8;color:#9a6e6e}.av2{background:#e8edf0;color:#6e7e9a}
+.av3{background:#e8f0e8;color:#6e9a6e}.av4{background:#f0ece8;color:#9a876e}
+.av5{background:#ece8f0;color:#876e9a}
+.cn-cell{display:flex;align-items:center;gap:8px}
+.clink{font-weight:500;color:var(--td);cursor:pointer}
+.clink:hover{color:var(--green)}
+
+/* AGENDA */
+.tslot{display:flex;gap:12px;margin-bottom:4px;align-items:flex-start}
+.tlbl{width:44px;font-size:11px;color:var(--tl);padding-top:10px;flex-shrink:0;text-align:right}
+.tline{flex:1}
+.ab{border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:9px 13px;margin-bottom:4px;cursor:pointer}
+.ab-conf{background:var(--gl);border-left-color:var(--green)}
+.ab-pend{background:#fdf5e8;border-left-color:#c4a96a}
+.ab-done{background:#eef3f1;border-left-color:#8fb0a0}
+.ab-canc,.ab-abs{background:#f5eaea;border-left-color:#c47a7a}
+.ab-name{font-size:13px;font-weight:500;color:var(--td)}
+.ab-det{font-size:11px;color:var(--tl);margin-top:2px;display:flex;align-items:center;gap:6px}
+.empty-slot{height:32px;border:1px dashed var(--border);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11.5px;color:var(--tl);cursor:pointer;transition:all .15s}
+.empty-slot:hover{border-color:var(--green);color:var(--green);background:var(--gl)}
+.wa-link{color:#25d366;text-decoration:none;font-size:13px}
+
+/* PROFILE */
+.ph{display:flex;align-items:flex-start;gap:14px;padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.ptabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px}
+.ptab{padding:8px 14px;font-size:13px;cursor:pointer;color:var(--tl);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.ptab.active{color:var(--green);border-bottom-color:var(--green);font-weight:500}
+.ptab:hover:not(.active){color:var(--td)}
+.flabel{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--tl);margin-bottom:4px;font-weight:500}
+.fvalue{font-size:13.5px;color:var(--td)}
+.frow2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.slabel{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--tl);margin-bottom:3px}
+.sval{font-size:22px;color:var(--td)}
+.anamnese-block{background:var(--gl);border:1px solid #c8ddc5;border-radius:10px;padding:13px 14px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+
+/* SERVIÇOS */
+.svc-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid var(--border);gap:12px}
+.svc-row:last-child{border-bottom:none}
+.svc-ic{width:34px;height:34px;background:var(--gl);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.svc-inf{flex:1}
+.svc-nm{font-size:13.5px;font-weight:500;color:var(--td)}
+.svc-ds{font-size:11.5px;color:var(--tl);margin-top:1px}
+.svc-mt{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.svc-pr{font-size:16px;color:var(--green);min-width:70px;text-align:right}
+.svc-inactive{opacity:.4}
+
+/* ESTOQUE BARS */
+.sbar-wrap{width:60px;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.sbar-fill{height:100%;border-radius:3px}
+.sb-ok{background:#7aaa7a}.sb-low{background:#e0a050}.sb-crit{background:#d06060}
+
+/* DASHBOARD WIDGETS */
+.birthday-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.birthday-row:last-child{border-bottom:none}
+.conta-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.conta-row:last-child{border-bottom:none}
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+
+/* MODAIS */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal-box{background:white;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.15);width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border)}
+.modal-body{padding:20px}
+.modal-footer{display:flex;gap:10px;padding:16px 20px 20px}
+.modal-footer .btn{flex:1;justify-content:center}
+.fgroup{margin-bottom:13px}
+.flabel2{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--tl);margin-bottom:5px;font-weight:500;display:block}
+.finput{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--td);background:white;outline:none;transition:border-color .15s}
+.finput:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(120,146,115,.08)}
+.ftextarea{height:70px;resize:none;line-height:1.6}
+.fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.alert-error{background:#f5eaea;border:1px solid #e8c8c8;border-radius:8px;padding:9px 13px;font-size:12.5px;color:#8a3a3a;margin-bottom:12px}
+.alert-success{background:#e6f0e5;border:1px solid #c8dcc5;border-radius:8px;padding:9px 13px;font-size:12.5px;color:#4a7a4a;margin-bottom:12px}
+
+/* LOADING */
+.loading-wrap{display:flex;justify-content:center;padding:40px}
+.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+.spinner-sm{width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-success{background:#2e2a26;color:white}
+.toast-error{background:#8a3a3a;color:white}
+
+/* SETTINGS */
+.st-section{margin-bottom:26px}
+.st-title{font-family:'VeryVogue',serif;font-size:17px;color:var(--td);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.day-chip{padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:white;color:var(--text);transition:all .15s;user-select:none;display:inline-block;margin-right:6px;margin-bottom:6px}
+.day-chip.active{background:var(--green);color:white;border-color:var(--green)}
+.info-banner{background:#f5eddc;border:1px solid #e8d4a8;border-radius:8px;padding:9px 13px;font-size:12.5px;color:#7a6030;margin-bottom:12px}
+
+/* ANAMNESE PÚBLICA */
+.anam-page{min-height:100vh;background:#f8f7f5;padding:40px 16px}
+.anam-wrap{max-width:680px;margin:0 auto}
+.anam-section{background:white;border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
+.anam-section-title{font-size:15px;font-weight:600;color:var(--td);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.radio-row{display:flex;gap:16px;flex-wrap:wrap}
+.radio-opt{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text)}
+.radio-opt input{accent-color:var(--green);cursor:pointer}
+.check-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.check-opt{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;color:var(--text);padding:8px 10px;border:1px solid var(--border);border-radius:7px;transition:all .15s}
+.check-opt:hover{border-color:var(--green);background:var(--gl)}
+.check-opt input{accent-color:var(--green)}
+
+/* CASHBACK RULES */
+.cb-rule{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:8px;margin-bottom:6px;border:1px solid}
+.cb-pix{background:#e8f5e8;border-color:#c0dcc0}
+.cb-deb{background:#e8edf5;border-color:#c0cce0}
+.cb-cred{background:#f5ede8;border-color:#e0d0c0}
+.cb-parc{background:#f0eef8;border-color:#ddd5f0}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .stats-grid,.stats-grid-4{grid-template-columns:1fr 1fr}
+  .grid-main,.grid-profile{grid-template-columns:1fr}
+  .frow2,.fgrid2,.fgrid3,.grid-2,.check-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- ANAMNESE PÚBLICA (página separada)          -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="anamnese-publica-page" class="anam-page hidden">
+  <div class="anam-wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:18px;border-bottom:2px solid var(--border)">
+      <div class="vv" style="font-size:32px;color:var(--td)">Ficha de anamnese</div>
+      <div style="text-align:right">
+        <div class="vv" style="font-size:20px;color:var(--green)">Deise Felix</div>
+        <div style="font-size:9px;color:var(--tl);letter-spacing:.18em;text-transform:uppercase;margin-top:2px">Estúdio de Beleza</div>
+      </div>
+    </div>
+    <div id="anam-pub-wrap">
+      <div style="background:var(--gl);border:1px solid #c8ddc5;border-radius:10px;padding:13px 16px;margin-bottom:20px;font-size:13px;color:var(--gd);line-height:1.6">
+        Olá, <strong id="anam-pub-nome"></strong>! Antes de começarmos, queremos entender melhor você e o seu cabelo. Cada detalhe <strong>é importante para que o resultado seja exatamente como você espera</strong> — com segurança e cuidado.
+      </div>
+      <div id="anam-pub-form">
+        <div class="anam-section">
+          <div class="anam-section-title">Perfil do cabelo</div>
+          <div class="fgroup"><label class="flabel2">Tipo de cabelo</label><div class="radio-row"><label class="radio-opt"><input type="radio" name="tipo" value="liso">Liso</label><label class="radio-opt"><input type="radio" name="tipo" value="ondulado">Ondulado</label><label class="radio-opt"><input type="radio" name="tipo" value="cacheado">Cacheado</label><label class="radio-opt"><input type="radio" name="tipo" value="crespo">Crespo</label></div></div>
+          <div class="fgrid3">
+            <div class="fgroup"><label class="flabel2">Espessura</label><div class="radio-row" style="flex-direction:column;gap:6px"><label class="radio-opt"><input type="radio" name="esp" value="fino">Fino</label><label class="radio-opt"><input type="radio" name="esp" value="médio">Médio</label><label class="radio-opt"><input type="radio" name="esp" value="grosso">Grosso</label></div></div>
+            <div class="fgroup"><label class="flabel2">Densidade</label><div class="radio-row" style="flex-direction:column;gap:6px"><label class="radio-opt"><input type="radio" name="den" value="baixa">Baixa</label><label class="radio-opt"><input type="radio" name="den" value="média">Média</label><label class="radio-opt"><input type="radio" name="den" value="alta">Alta</label></div></div>
+            <div class="fgroup"><label class="flabel2">Porosidade</label><div class="radio-row" style="flex-direction:column;gap:6px"><label class="radio-opt"><input type="radio" name="por" value="baixa">Baixa</label><label class="radio-opt"><input type="radio" name="por" value="média">Média</label><label class="radio-opt"><input type="radio" name="por" value="alta">Alta</label></div></div>
+          </div>
+          <div class="fgrid2">
+            <div class="fgroup"><label class="flabel2">Elasticidade</label><div class="radio-row"><label class="radio-opt"><input type="radio" name="elas" value="baixa">Baixa</label><label class="radio-opt"><input type="radio" name="elas" value="média">Média</label><label class="radio-opt"><input type="radio" name="elas" value="alta">Alta</label></div></div>
+            <div class="fgroup"><label class="flabel2">Curvatura natural (se souber)</label><input id="curvatura" class="finput" placeholder="Ex: 2A, 3B..."></div>
+          </div>
+        </div>
+        <div class="anam-section">
+          <div class="anam-section-title">Histórico Capilar</div>
+          <div class="fgroup"><label class="flabel2">Você já realizou algum procedimento químico? Qual?</label><input id="proc-anterior" class="finput" placeholder="Descreva se houver"></div>
+          <div class="fgroup"><label class="flabel2">Quando foi o último procedimento?</label><input id="ult-proc" class="finput" placeholder="Ex: há 2 meses..."></div>
+          <div class="fgrid2">
+            <div class="fgroup"><label class="flabel2">Já fez alisamento/progressiva?</label><div class="radio-row"><label class="radio-opt"><input type="radio" name="alis" value="sim">Sim</label><label class="radio-opt"><input type="radio" name="alis" value="nao">Não</label></div></div>
+            <div class="fgroup"><label class="flabel2">Qual produto?</label><input id="qual-alis" class="finput" placeholder="Ex: progressiva orgânica..."></div>
+          </div>
+          <div class="fgrid2">
+            <div class="fgroup"><label class="flabel2">Possui coloração/descoloração?</label><div class="radio-row"><label class="radio-opt"><input type="radio" name="color" value="sim">Sim</label><label class="radio-opt"><input type="radio" name="color" value="nao">Não</label></div></div>
+            <div class="fgroup"><label class="flabel2">Já teve quebra ou queda?</label><div class="radio-row"><label class="radio-opt"><input type="radio" name="queda" value="sim">Sim</label><label class="radio-opt"><input type="radio" name="queda" value="nao">Não</label></div></div>
+          </div>
+        </div>
+        <div class="anam-section">
+          <div class="anam-section-title">Segurança</div>
+          <div class="fgrid2">
+            <div class="fgroup"><label class="flabel2">Possui alguma alergia?</label><div class="radio-row"><label class="radio-opt"><input type="radio" name="alergia" value="sim">Sim</label><label class="radio-opt"><input type="radio" name="alergia" value="nao">Não</label></div></div>
+            <div class="fgroup"><label class="flabel2">Já teve reação a produtos?</label><div class="radio-row"><label class="radio-opt"><input type="radio" name="reacao" value="sim">Sim</label><label class="radio-opt"><input type="radio" name="reacao" value="nao">Não</label></div></div>
+            <div class="fgroup"><label class="flabel2">Queda/quebra após procedimento?</label><div class="radio-row"><label class="radio-opt"><input type="radio" name="qued2" value="sim">Sim</label><label class="radio-opt"><input type="radio" name="qued2" value="nao">Não</label></div></div>
+            <div class="fgroup"><label class="flabel2">Couro cabeludo sensível?</label><div class="radio-row"><label class="radio-opt"><input type="radio" name="sensivel" value="sim">Sim</label><label class="radio-opt"><input type="radio" name="sensivel" value="nao">Não</label></div></div>
+          </div>
+        </div>
+        <div class="anam-section">
+          <div class="anam-section-title">Rotina</div>
+          <div class="fgroup"><label class="flabel2">Produtos que usa atualmente</label><input id="produtos-atuais" class="finput" placeholder="Shampoo, condicionador, leave-in..."></div>
+          <div class="fgrid2">
+            <div class="fgroup"><label class="flabel2">Frequência de lavagem</label><input id="freq-lav" class="finput" placeholder="Ex: a cada 2 dias..."></div>
+            <div class="fgroup"><label class="flabel2">Usa secador/prancha?</label><div class="radio-row" style="margin-top:8px"><label class="radio-opt"><input type="radio" name="calor" value="sim">Sim</label><label class="radio-opt"><input type="radio" name="calor" value="nao">Não</label></div></div>
+          </div>
+        </div>
+        <div class="anam-section">
+          <div class="anam-section-title">Problemas identificados</div>
+          <div class="check-grid">
+            <label class="check-opt"><input type="checkbox" class="prob-check" value="Quebra">Quebra</label>
+            <label class="check-opt"><input type="checkbox" class="prob-check" value="Queda">Queda</label>
+            <label class="check-opt"><input type="checkbox" class="prob-check" value="Ressecamento">Ressecamento</label>
+            <label class="check-opt"><input type="checkbox" class="prob-check" value="Oleosidade">Oleosidade</label>
+            <label class="check-opt"><input type="checkbox" class="prob-check" value="Frizz">Frizz</label>
+            <label class="check-opt"><input type="checkbox" class="prob-check" value="Danos químicos">Danos químicos</label>
+            <label class="check-opt"><input type="checkbox" class="prob-check" value="Falta de alinhamento">Falta de alinhamento</label>
+            <label class="check-opt"><input type="checkbox" class="prob-check" value="Falta de brilho">Falta de brilho</label>
+            <label class="check-opt"><input type="checkbox" class="prob-check" value="Outro">Outro</label>
+          </div>
+        </div>
+        <div style="background:var(--gl);border:1px solid #c8ddc5;border-radius:10px;padding:18px;text-align:center;margin-bottom:16px">
+          <div style="font-size:14px;font-weight:600;color:var(--td);margin-bottom:8px">Termo de ciência</div>
+          <p style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:12px">Declaro que fui orientada sobre o procedimento, compreendo que o resultado depende da condição atual do cabelo e autorizo a realização do serviço.</p>
+          <label class="radio-opt" style="justify-content:center;gap:8px"><input type="checkbox" id="termo-check" style="accent-color:var(--green);width:15px;height:15px"><span style="font-size:13px;font-weight:500;color:var(--td)">Li e concordo com os termos acima</span></label>
+        </div>
+        <button id="btn-enviar-anam" onclick="enviarAnamnese()" class="btn btnp" style="width:100%;justify-content:center;padding:13px;font-size:14px">Enviar ficha de anamnese</button>
+      </div>
+      <div id="anam-pub-success" class="hidden" style="text-align:center;padding:40px 20px">
+        <div style="width:60px;height:60px;background:var(--gl);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px">✓</div>
+        <div class="vv" style="font-size:26px;color:var(--td);margin-bottom:8px">Ficha enviada!</div>
+        <p style="font-size:13.5px;color:var(--tl);line-height:1.7">Sua ficha foi recebida pelo estúdio Deise Felix.<br>As informações foram salvas no seu cadastro.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- APP PRINCIPAL                               -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="app" id="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sl"><div class="brand">Deise Felix</div><div class="sub">Estúdio de Beleza</div></div>
+  <nav class="snav">
+    <div class="nsec">
+      <div class="nslabel">Principal</div>
+      <div class="ni active" onclick="nav('dashboard',this)">🏠 Dashboard</div>
+      <div class="ni" onclick="nav('agenda',this)">📅 Agenda</div>
+    </div>
+    <div class="nsec">
+      <div class="nslabel">Gestão</div>
+      <div class="ni" onclick="nav('clientes',this)">👥 Clientes</div>
+      <div class="ni" onclick="nav('servicos',this)">✂️ Serviços</div>
+    </div>
+    <div class="nsec">
+      <div class="nslabel">Financeiro</div>
+      <div class="ni" onclick="nav('financeiro',this)">💰 Financeiro</div>
+      <div class="ni" onclick="nav('cashback',this)">🎁 Cashback</div>
+      <div class="ni" onclick="nav('estoque',this)">📦 Estoque</div>
+      <div class="ni" onclick="nav('fornecedores',this)">🚚 Fornecedores</div>
+      <div class="ni" onclick="nav('relatorios',this)">📊 Relatórios</div>
+    </div>
+    <div class="nsec">
+      <div class="nslabel">Sistema</div>
+      <div class="ni" onclick="nav('anamnese',this)">📋 Anamnese</div>
+      <div class="ni" onclick="nav('configuracoes',this)">⚙️ Configurações</div>
+    </div>
+  </nav>
+  <div class="shelp"><div style="font-size:11px;font-weight:500;color:var(--td)">💬 Precisa de ajuda?</div><div style="font-size:10px;color:var(--tl)">Fale com o suporte</div></div>
+  <div class="sfooter"><div class="sav">DF</div><div><div style="font-size:12px;font-weight:500;color:var(--td)">Deise Felix</div><div style="font-size:10px;color:var(--tl)">Administradora</div></div></div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <header class="header">
+    <div id="htitle" class="vv" style="font-size:19px;color:var(--td)">Dashboard</div>
+    <div class="hacts">
+      <button class="btn btnp" onclick="populateAgModal()">+ Novo agendamento</button>
+      <button class="notif-btn">🔔<div class="notif-dot"></div></button>
+      <div class="sav" style="width:32px;height:32px;font-size:11px;cursor:pointer">DF</div>
+    </div>
+  </header>
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div class="page active" id="page-dashboard">
+    <div style="margin-bottom:22px">
+      <div class="vv" style="font-size:28px;color:var(--td)">Bom dia, Deise! ✦</div>
+      <div style="font-size:13px;color:var(--tl);margin-top:3px">Aqui está o que está acontecendo no seu salão hoje.</div>
+    </div>
+    <div id="dash-stats" class="stats-grid"></div>
+    <div style="display:grid;grid-template-columns:1fr 300px;gap:14px;margin-bottom:14px">
+      <div class="card">
+        <div class="section-hd">
+          <div class="vv" style="font-size:16px;color:var(--td)">Agendamentos da semana</div>
+          <span class="link-sm" onclick="nav('agenda')">Ver agenda →</span>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Cliente</th><th>Procedimento</th><th>Data</th><th>Horário</th><th>Valor</th><th>Status</th></tr></thead>
+          <tbody id="dash-agendamentos"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="section-hd" style="margin-bottom:12px">
+          <div class="vv" style="font-size:15px;color:var(--td)">Aniversariantes 🎂</div>
+          <span class="link-sm" onclick="nav('clientes')">Ver todas →</span>
+        </div>
+        <div id="dash-aniversariantes"></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="card">
+        <div class="section-hd" style="margin-bottom:12px">
+          <div class="vv" style="font-size:15px;color:var(--td)">Contas próximas do vencimento</div>
+          <span class="link-sm" onclick="nav('financeiro')">Ver todas →</span>
+        </div>
+        <div id="dash-contas"></div>
+      </div>
+      <div class="card">
+        <div class="section-hd" style="margin-bottom:12px">
+          <div class="vv" style="font-size:15px;color:var(--td)">Estoque baixo</div>
+          <span class="link-sm" onclick="nav('estoque')">Ver estoque →</span>
+        </div>
+        <div id="dash-estoque"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ AGENDA ═══ -->
+  <div class="page" id="page-agenda">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">
+      <button class="btn-icon" onclick="agendaNav(-1)">‹</button>
+      <div id="agenda-date-label" class="vv" style="font-size:19px;color:var(--td);flex:1"></div>
+      <button class="btn-icon" onclick="agendaNav(1)">›</button>
+      <button class="btn btnp" onclick="populateAgModal()">+ Novo agendamento</button>
+    </div>
+    <div class="card"><div id="agenda-slots"></div></div>
+  </div>
+
+  <!-- ═══ CLIENTES ═══ -->
+  <div class="page" id="page-clientes">
+    <div id="clientes-list-view">
+      <div class="sbar-wrap2">
+        <input class="sinput" placeholder="Buscar por nome ou telefone..." oninput="filterClientes(this.value)">
+        <button class="btn btng">Filtros</button>
+        <button class="btn btnp" onclick="openModal('modal-cliente')">+ Nova cliente</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="tbl">
+          <thead><tr><th>Cliente</th><th>Telefone</th><th>Serviço favorito</th><th>Anamnese</th><th>Categoria</th><th>Status</th></tr></thead>
+          <tbody id="clientes-table"></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="cliente-profile-view" class="hidden">
+      <button class="back-btn" onclick="backToClientes()">← Voltar para clientes</button>
+      <div class="grid-profile">
+        <div class="card"><div id="profile-content"></div></div>
+        <div id="profile-sidebar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SERVIÇOS ═══ -->
+  <div class="page" id="page-servicos">
+    <div class="sbar-wrap2">
+      <input class="sinput" placeholder="Buscar serviço...">
+      <button class="btn btnp" onclick="openModal('modal-servico')">+ Novo serviço</button>
+    </div>
+    <div class="info-banner">ℹ️ Serviços com histórico devem ser desativados, não excluídos.</div>
+    <div class="card"><div id="servicos-list"></div></div>
+  </div>
+
+  <!-- ═══ FINANCEIRO ═══ -->
+  <div class="page" id="page-financeiro">
+    <div id="fin-stats" class="stats-grid-4"></div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px">
+      <div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="section-hd">
+            <div class="vv" style="font-size:15px;color:var(--td)">Entradas recentes</div>
+            <button class="btn btnp" style="font-size:12px;padding:5px 11px" onclick="document.getElementById('trans-tipo').value='entrada';openModal('modal-transacao')">+ Nova entrada</button>
+          </div>
+          <table class="tbl"><thead><tr><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Pagamento</th><th>Data</th><th>Status</th></tr></thead><tbody id="fin-entradas"></tbody></table>
+        </div>
+        <div class="card">
+          <div class="section-hd">
+            <div class="vv" style="font-size:15px;color:var(--td)">Saídas / Despesas</div>
+            <button class="btn btng" style="font-size:12px;padding:5px 11px" onclick="document.getElementById('trans-tipo').value='saida';openModal('modal-transacao')">+ Nova saída</button>
+          </div>
+          <table class="tbl"><thead><tr><th>Despesa</th><th>Categoria</th><th>Valor</th><th>Vencimento</th><th>Status</th></tr></thead><tbody id="fin-saidas"></tbody></table>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="vv" style="font-size:15px;color:var(--td);margin-bottom:12px">Contas a pagar</div>
+          <div id="fin-contas"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CASHBACK ═══ -->
+  <div class="page" id="page-cashback">
+    <div id="cb-stats" class="stats-grid-3"></div>
+    <div style="display:grid;grid-template-columns:1fr 240px;gap:14px">
+      <div class="card">
+        <div class="vv" style="font-size:15px;color:var(--td);margin-bottom:14px">Histórico de cashback</div>
+        <table class="tbl"><thead><tr><th>Cliente</th><th>Serviço</th><th>Valor</th><th>Pagto.</th><th>%</th><th>Cashback</th><th>Status</th></tr></thead><tbody id="cb-table"></tbody></table>
+      </div>
+      <div class="card">
+        <div class="vv" style="font-size:15px;color:var(--td);margin-bottom:14px">Regras</div>
+        <div class="cb-rule cb-pix"><div><div style="font-size:13px;font-weight:500;color:var(--td)">Pix / Dinheiro</div><div style="font-size:11px;color:var(--tl)">à vista</div></div><div class="vv" style="font-size:20px;color:#4a7a4a">10%</div></div>
+        <div class="cb-rule cb-deb"><div><div style="font-size:13px;font-weight:500;color:var(--td)">Débito</div></div><div class="vv" style="font-size:20px;color:#3a5a8a">8%</div></div>
+        <div class="cb-rule cb-cred"><div><div style="font-size:13px;font-weight:500;color:var(--td)">Crédito à vista</div></div><div class="vv" style="font-size:20px;color:#8a6a3a">5%</div></div>
+        <div class="cb-rule cb-parc" style="margin-bottom:0"><div><div style="font-size:13px;font-weight:500;color:var(--td)">Parcelado</div></div><div class="vv" style="font-size:20px;color:#5a4a8a">3%</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ESTOQUE ═══ -->
+  <div class="page" id="page-estoque">
+    <div class="sbar-wrap2">
+      <input class="sinput" placeholder="Buscar produto..." oninput="filterEstoque(this.value)">
+      <button class="btn btng">Filtros</button>
+      <button class="btn btnp" onclick="populateProdModal()">+ Novo produto</button>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="tbl"><thead><tr><th>Produto</th><th>Categoria</th><th>Fornecedor</th><th>Última compra</th><th>Qtd.</th><th>Mín.</th><th>Nível</th><th>Status</th></tr></thead><tbody id="estoque-table"></tbody></table>
+    </div>
+  </div>
+
+  <!-- ═══ FORNECEDORES ═══ -->
+  <div class="page" id="page-fornecedores">
+    <div id="forn-list-view">
+      <div class="sbar-wrap2">
+        <input class="sinput" placeholder="Buscar fornecedor...">
+        <button class="btn btnp" onclick="openModal('modal-fornecedor')">+ Novo fornecedor</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="tbl"><thead><tr><th>Fornecedor</th><th>Contato</th><th>Em aberto</th><th>Parcelas</th><th>Status</th><th></th></tr></thead><tbody id="forn-table"></tbody></table>
+      </div>
+    </div>
+    <div id="forn-detail-view" class="hidden">
+      <button class="back-btn" onclick="backToFornecedores()">← Voltar para fornecedores</button>
+      <div style="display:grid;grid-template-columns:1fr 240px;gap:14px">
+        <div class="card"><div id="forn-detail-content"></div></div>
+        <div id="forn-detail-sidebar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RELATÓRIOS ═══ -->
+  <div class="page" id="page-relatorios">
+    <div id="rel-stats" class="stats-grid-3"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="card">
+        <div class="vv" style="font-size:15px;color:var(--td);margin-bottom:14px">Serviços mais realizados</div>
+        <table class="tbl"><thead><tr><th>#</th><th>Serviço</th><th>Qtd.</th><th>Receita</th></tr></thead><tbody id="rel-svcs"></tbody></table>
+      </div>
+      <div class="card">
+        <div class="vv" style="font-size:15px;color:var(--td);margin-bottom:14px">Formas de pagamento</div>
+        <div id="rel-pagamentos"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ANAMNESE ADMIN ═══ -->
+  <div class="page" id="page-anamnese">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div><div class="vv" style="font-size:22px;color:var(--td)">Fichas de Anamnese</div><div style="font-size:13px;color:var(--tl);margin-top:3px">Gerencie as fichas preenchidas pelas clientes</div></div>
+    </div>
+    <div id="anam-stats" class="stats-grid-3"></div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div class="vv" style="font-size:15px;color:var(--td)">Fichas recentes</div>
+        <input class="sinput" placeholder="Buscar cliente..." style="width:200px;flex:unset">
+      </div>
+      <table class="tbl"><thead><tr><th>Cliente</th><th>Enviada</th><th>Preenchida</th><th>Tipo cabelo</th><th>Alergias</th><th>Status</th><th></th></tr></thead><tbody id="anam-table"></tbody></table>
+    </div>
+  </div>
+
+  <!-- ═══ CONFIGURAÇÕES ═══ -->
+  <div class="page" id="page-configuracoes">
+    <div style="max-width:700px">
+      <div class="st-section">
+        <div class="st-title card" style="padding:14px 18px;margin-bottom:0;border-radius:12px 12px 0 0;border-bottom:none">Dados do salão</div>
+        <div class="card" style="border-radius:0 0 12px 12px;border-top:none">
+          <div class="fgrid2" style="margin-bottom:12px">
+            <div class="fgroup"><label class="flabel2">Nome</label><input id="cfg-nome" class="finput" value="Deise Felix"></div>
+            <div class="fgroup"><label class="flabel2">Telefone</label><input id="cfg-telefone" class="finput" placeholder="(11) 99000-1234"></div>
+          </div>
+          <div class="fgroup"><label class="flabel2">Endereço</label><input id="cfg-endereco" class="finput" placeholder="Rua, número, bairro, cidade"></div>
+          <div class="fgroup"><label class="flabel2">Link do agendamento externo</label><input id="cfg-link" class="finput" placeholder="https://..."></div>
+        </div>
+      </div>
+      <div class="st-section">
+        <div class="card">
+          <div class="st-title">Horários de funcionamento</div>
+          <div style="margin-bottom:12px">
+            <div class="flabel2" style="margin-bottom:7px">Dias ativos</div>
+            <div class="day-chip" onclick="this.classList.toggle('active')">Dom</div>
+            <div class="day-chip active" onclick="this.classList.toggle('active')">Seg</div>
+            <div class="day-chip active" onclick="this.classList.toggle('active')">Ter</div>
+            <div class="day-chip active" onclick="this.classList.toggle('active')">Qua</div>
+            <div class="day-chip active" onclick="this.classList.toggle('active')">Qui</div>
+            <div class="day-chip active" onclick="this.classList.toggle('active')">Sex</div>
+            <div class="day-chip active" onclick="this.classList.toggle('active')">Sáb</div>
+          </div>
+          <div class="fgrid2">
+            <div class="fgroup"><label class="flabel2">Abertura</label><input type="time" id="cfg-abertura" class="finput" value="08:30"></div>
+            <div class="fgroup"><label class="flabel2">Fechamento</label><input type="time" id="cfg-fechamento" class="finput" value="19:00"></div>
+          </div>
+        </div>
+      </div>
+      <div class="st-section">
+        <div class="card">
+          <div class="st-title">Mensagem de confirmação de agendamento</div>
+          <div class="fgroup"><label class="flabel2">Texto</label><textarea id="cfg-msg-confirmacao" class="finput ftextarea">Olá, {nome_cliente}! Confirmando seu horário no Deise Felix: {servico}, no dia {data}, às {horario}. Podemos confirmar?</textarea></div>
+          <div style="font-size:11.5px;color:var(--tl)">Variáveis: {nome_cliente} · {servico} · {data} · {horario}</div>
+        </div>
+      </div>
+      <div class="st-section">
+        <div class="card">
+          <div class="st-title">Mensagem de aniversário 🎂</div>
+          <div style="background:var(--gl);border:1px solid #c8ddc5;border-radius:8px;padding:10px 13px;font-size:12.5px;color:var(--gd);margin-bottom:14px">
+            Esta mensagem é enviada pelo botão WhatsApp no card de aniversariantes do dashboard.
+          </div>
+          <div class="fgroup"><label class="flabel2">Texto da mensagem</label><textarea id="cfg-msg-aniversario" class="finput ftextarea">Feliz aniversário, {nome}! 🎉🌸 O Deise Felix deseja um dia lindo! Você ganhou {desconto} de desconto no próximo atendimento. Agende: {link} 💚</textarea></div>
+          <div style="font-size:11.5px;color:var(--tl);margin-bottom:14px">Variáveis: {nome} · {desconto} · {link}</div>
+          <div class="fgroup"><label class="flabel2">Desconto de aniversário</label><input id="cfg-desconto" class="finput" value="15%" style="max-width:200px"></div>
+        </div>
+      </div>
+      <button id="btn-salvar-cfg" class="btn btnp" onclick="salvarConfig()">Salvar configurações</button>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- ═══════════ MODAIS ═══════════ -->
+
+<!-- Modal Nova Cliente -->
+<div id="modal-cliente" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="vv" style="font-size:19px;color:var(--td)">Nova cliente</div>
+      <button class="btn-icon" onclick="closeModal('modal-cliente')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fgrid2"><div class="fgroup"><label class="flabel2">Nome completo *</label><input id="new-nome" class="finput" placeholder="Ex: Mariana Alves"></div><div class="fgroup"><label class="flabel2">Telefone / WhatsApp *</label><input id="new-telefone" class="finput" placeholder="(11) 99000-0000"></div></div>
+      <div class="fgroup"><label class="flabel2">E-mail</label><input id="new-email" class="finput" placeholder="email@exemplo.com"></div>
+      <div class="fgrid2"><div class="fgroup"><label class="flabel2">Data de nascimento</label><input type="date" id="new-nasc" class="finput"></div><div class="fgroup"><label class="flabel2">Categoria</label><select id="new-cat" class="finput"><option>Nova</option><option>Regular</option><option>Frequente</option><option>VIP</option></select></div></div>
+      <div class="fgroup"><label class="flabel2">Endereço</label><input id="new-end" class="finput" placeholder="Rua, número, bairro, cidade"></div>
+      <div class="fgrid2"><div class="fgroup"><label class="flabel2">Serviço favorito</label><input id="new-svc-fav" class="finput" placeholder="Ex: Coloração"></div><div class="fgroup"><label class="flabel2">Origem</label><input id="new-origem" class="finput" placeholder="Ex: Instagram"></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btng" onclick="closeModal('modal-cliente')">Cancelar</button>
+      <button id="btn-salvar-cliente" class="btn btnp" onclick="salvarCliente()">Salvar cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Novo Agendamento -->
+<div id="modal-agendamento" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="vv" style="font-size:19px;color:var(--td)">Novo agendamento</div>
+      <button class="btn-icon" onclick="closeModal('modal-agendamento')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fgroup"><label class="flabel2">Cliente *</label><select id="ag-cliente" class="finput"><option value="">Carregando...</option></select></div>
+      <div class="fgroup"><label class="flabel2">Serviço *</label><select id="ag-servico" class="finput"><option value="">Selecione o serviço...</option></select></div>
+      <div class="fgrid2"><div class="fgroup"><label class="flabel2">Data *</label><input type="date" id="ag-data" class="finput"></div><div class="fgroup"><label class="flabel2">Horário *</label><input type="time" id="ag-horario" class="finput" value="09:00"></div></div>
+      <div class="fgrid2"><div class="fgroup"><label class="flabel2">Profissional</label><input id="ag-profissional" class="finput" value="Deise"></div><div class="fgroup"><label class="flabel2">Valor (R$)</label><input type="number" id="ag-valor" class="finput" placeholder="0,00"></div></div>
+      <div class="fgroup"><label class="flabel2">Observações</label><textarea id="ag-obs" class="finput ftextarea" placeholder="Opcional..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btng" onclick="closeModal('modal-agendamento')">Cancelar</button>
+      <button id="btn-salvar-ag" class="btn btnp" onclick="salvarAgendamento()">Agendar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Novo Produto -->
+<div id="modal-produto" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="vv" style="font-size:19px;color:var(--td)">Novo produto</div>
+      <button class="btn-icon" onclick="closeModal('modal-produto')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fgroup"><label class="flabel2">Nome do produto *</label><input id="prod-nome" class="finput" placeholder="Ex: Botox Cadiveu 1kg"></div>
+      <div class="fgrid2"><div class="fgroup"><label class="flabel2">Categoria *</label><input id="prod-cat" class="finput" placeholder="Ex: Tratamento"></div><div class="fgroup"><label class="flabel2">Fornecedor</label><select id="prod-forn" class="finput"><option value="">Selecione...</option></select></div></div>
+      <div class="fgrid3"><div class="fgroup"><label class="flabel2">Quantidade</label><input type="number" id="prod-qtd" class="finput" value="0"></div><div class="fgroup"><label class="flabel2">Qtd. mínima</label><input type="number" id="prod-qtd-min" class="finput" value="5"></div><div class="fgroup"><label class="flabel2">Unidade</label><input id="prod-unidade" class="finput" value="un" placeholder="un, ml, kg..."></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btng" onclick="closeModal('modal-produto')">Cancelar</button>
+      <button id="btn-salvar-produto" class="btn btnp" onclick="salvarProduto()">Salvar produto</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nova Transação -->
+<div id="modal-transacao" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="vv" style="font-size:19px;color:var(--td)" id="trans-modal-title">Nova transação</div>
+      <button class="btn-icon" onclick="closeModal('modal-transacao')">✕</button>
+    </div>
+    <input type="hidden" id="trans-tipo" value="entrada">
+    <div class="modal-body">
+      <div class="fgroup"><label class="flabel2">Descrição *</label><input id="trans-desc" class="finput" placeholder="Ex: Coloração — Mariana Alves"></div>
+      <div class="fgrid2"><div class="fgroup"><label class="flabel2">Categoria *</label><select id="trans-cat" class="finput"><option value="">Selecione...</option><option>Serviço</option><option>Produto</option><option>Aluguel</option><option>Estoque</option><option>Energia</option><option>Água</option><option>Internet</option><option>Software</option><option>Marketing</option><option>Fornecedor</option><option>Outro</option></select></div><div class="fgroup"><label class="flabel2">Valor (R$) *</label><input id="trans-valor" class="finput" placeholder="0,00"></div></div>
+      <div class="fgrid2"><div class="fgroup"><label class="flabel2">Data</label><input type="date" id="trans-data" class="finput"></div><div class="fgroup"><label class="flabel2">Vencimento</label><input type="date" id="trans-venc" class="finput"></div></div>
+      <div class="fgrid2"><div class="fgroup"><label class="flabel2">Forma de pagamento</label><select id="trans-pgto" class="finput"><option value="">Selecione...</option><option>Pix</option><option>Dinheiro</option><option>Débito</option><option>Crédito</option><option>Parcelado</option><option>Boleto</option></select></div><div class="fgroup"><label class="flabel2">Status</label><select id="trans-status" class="finput"><option value="pago">Pago</option><option value="pendente">Pendente</option><option value="atrasado">Atrasado</option></select></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btng" onclick="closeModal('modal-transacao')">Cancelar</button>
+      <button id="btn-salvar-trans" class="btn btnp" onclick="salvarTransacao(document.getElementById('trans-tipo').value)">Lançar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
