@@ -1,2 +1,2 @@
 const SUPABASE_URL = 'https://fgjrcyxxxsonennyprgy.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnanJjeXh4c3NvbmVubnlwcmd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzY4MTMsImV4cCI6MjA5MjY1MjgxM30.olwioLTfLcyevph29oAdGxAhE0_6f04a5e0TUz0AvzU';
+const SUPABASE_KEY = 'sb_publishable_CVgtnyC7vt2Ok3v8Ul0Kww_vM_JUopJ';
